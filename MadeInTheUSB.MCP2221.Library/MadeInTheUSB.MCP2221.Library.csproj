@@ -44,10 +44,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Adafruit\Adafruit_GFX.cs" />
+    <Compile Include="Adafruit\LEDBackpack.cs" />
+    <Compile Include="Interface\II2CDevice.cs" />
+    <Compile Include="Util\BitUtil.cs" />
     <Compile Include="Class\FlashProtectionState.cs" />
     <Compile Include="Class\GPIO.cs" />
+    <Compile Include="Class\I2CDevice.cs" />
     <Compile Include="Class\IGPIO.cs" />
     <Compile Include="Class\MCP2221Device.cs" />
+    <Compile Include="Class\MCP2221DeviceBase.cs" />
     <Compile Include="Enum\UsbPowerSource.cs" />
     <Compile Include="Exception\MCP2221DeviceException.cs" />
     <Compile Include="Enum\PinDesignation.cs" />
@@ -55,8 +61,6 @@
     <Compile Include="Enum\PinState.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Interface\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

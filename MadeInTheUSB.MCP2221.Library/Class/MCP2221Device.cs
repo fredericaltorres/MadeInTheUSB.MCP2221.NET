@@ -4,81 +4,17 @@ using System.Text;
 using System.Threading.Tasks;
 using MCP2221;
 
-
 namespace MadeInTheUSB.MCP2221.Lib
 {
-    public  class MCP2221DeviceBase
-    {
-        protected static MchpUsbI2c _mchpUsbI2c;
-
-        public static Dictionary<int, string> ErrorDescriptions = new Dictionary<int, string>()
-        {
-            {    3 , "Command not allowed The flash is either locked or password protected. If password protected, send correct access password to unlock flash for editing." },
-            {   -1 , "Board not found. Check connection and device enumeration" },
-            {   -2 , "Wrong device ID. Ensure DLL was initialized properly" },
-            {   -3 , "Reading the device failed. Ensure DLL was initialized properly" },
-            {   -4 , "Device write failed" },
-            {   -5 , "Device read failed" },
-            {  -10 , "GP pin not configured as GPIO Configure GP pin as GPIO and try operation again." },
-            {  -11 , "I2C Slave data NACK received" },
-            {  -12 , "Wrong PEC" },
-            {  -13 , "Flash locked" },
-            {  -14 , "Password attempt limit reach" },
-            {  -15 , "Invalid state" },
-            {  -16 , "Invalid data length" },
-            {  -17 , "Error copying memory" },
-            {  -18 , "Timeout" },
-            {  -19 , "I2C send error" },
-            {  -20 , "Error setting I2C address" },
-            {  -21 , "Error setting I2C speed" },
-            {  -22 , "Invalid I2C status" },
-            {  -23 , "Address NACK received" },
-            { -201 , "Invalid parameter given(1st parameter) 1" },
-            { -202 , "Invalid parameter given(2nd parameter) 2" },
-            { -203 , "Invalid parameter given(3rd parameter) 3" },
-            { -204 , "Invalid parameter given(4th parameter) 4" },
-            { -205 , "Invalid parameter given(5th parameter) 5" },
-            { -206 , "Invalid parameter given(6th parameter) 6" },
-            { -207 , "Invalid parameter given(7th parameter) 7" },
-            { -208 , "Invalid parameter given(8th parameter) 8" },
-            { -209 , "Invalid parameter given(9th parameter) 9" },
-        };
-        protected void CheckErrorCode(int r, string message)
-        {
-            if (ErrorDescriptions.ContainsKey(r))
-                throw new MCP2221DeviceException($"{message}, Code:{r} {ErrorDescriptions[r]}");
-
-            if (r < 0) // Un documented error
-                throw new MCP2221DeviceException($"{message}, Code:{r}");
-        }
-    }
-
-    public class I2CDevice : MCP2221DeviceBase
-    {
-        public const int DEFAULT_I2C_SPEED = 400 * 1024;
-        
-        private readonly int _clockSpeed;
-
-        //_mchpUsbI2c.Functions.WriteI2cData()
-
-        public I2CDevice(int clockSpeed = DEFAULT_I2C_SPEED)
-        {
-            this._clockSpeed = clockSpeed;
-        }
-
-        public bool Write(byte address, byte [] buffer)
-        {
-            _mchpUsbI2c.Functions.WriteI2cData(address, buffer, (uint)buffer.Length, (uint)this._clockSpeed);
-            return true;
-        }
-    }
-
     /// <summary>
     /// Reference Document: MCP2221 DLL User Manual.pdf
     /// https://www.microchip.com/wwwproducts/en/MCP2221
     /// Datasheet http://ww1.microchip.com/downloads/en/DeviceDoc/20005292C.pdf
     /// MCP2221 Breakout Module User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002282a.pdf
     /// MCP2221 I2C Demonstration Board User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002480a.pdf
+    /// 
+    /// https://blog.zakkemble.net/mcp2221-hid-library/
+    /// 
     /// </summary>
     public partial class MCP2221Device : MCP2221DeviceBase, IGPIO
     {
@@ -167,6 +103,10 @@ namespace MadeInTheUSB.MCP2221.Lib
             int r = _mchpUsbI2c.Settings.GetClockPinDividerValue(DllConstants.CURRENT_SETTINGS_ONLY); //  Get the current (SRAM) setting of the clock pin divider value
             sb.Append($"Clock pin divider: {(1 << r)}").AppendLine();
 
+
+            sb.Append($"ClockPinDividerValue: {(UsbPowerSource)_mchpUsbI2c.Settings.GetClockPinDividerValue(DllConstants.CURRENT_SETTINGS_ONLY)}").AppendLine();
+            sb.Append($"GetClockPinDutyCycle: {(UsbPowerSource)_mchpUsbI2c.Settings.GetClockPinDutyCycle(DllConstants.CURRENT_SETTINGS_ONLY)}").AppendLine();
+
             return sb.ToString();
         }
 
@@ -196,6 +136,7 @@ namespace MadeInTheUSB.MCP2221.Lib
             var r = _mchpUsbI2c.Functions.ReadGpioPinValue((byte)index);
             if (r < 0)
                 CheckErrorCode(r, nameof(DigitalRead));
+
             return r == 0 ? PinState.Low : PinState.High;
         }
 
@@ -210,14 +151,17 @@ namespace MadeInTheUSB.MCP2221.Lib
             DigitalWrite(index, on == PinState.High);
         }
 
-        
-
         public IEnumerable<int> GpioIndexes
         {
             get
             {
                 return Enumerable.Range(0, MAX_GPIO);
             }
+        }
+
+        public I2CDevice GetI2CDeviceInstance(byte address, int clockSpeed = I2CDevice.DEFAULT_I2C_SPEED)
+        {
+            return new I2CDevice(address, clockSpeed);
         }
     }
 }
