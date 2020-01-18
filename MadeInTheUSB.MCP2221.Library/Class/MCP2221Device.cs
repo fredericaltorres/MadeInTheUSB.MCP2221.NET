@@ -7,24 +7,9 @@ using MCP2221;
 
 namespace MadeInTheUSB.MCP2221.Lib
 {
-    public interface IGPIO
+    public  class MCP2221DeviceBase
     {
-        PinState DigitalRead(int index);
-        void DigitalWrite(int index, PinState on);
-        void DigitalWrite(int index, bool high);
-
-        void SetPinDirection(int index, PinDirection direction);
-    }
-    /// <summary>
-    /// Reference Document: MCP2221 DLL User Manual.pdf
-    /// https://www.microchip.com/wwwproducts/en/MCP2221
-    /// Datasheet http://ww1.microchip.com/downloads/en/DeviceDoc/20005292C.pdf
-    /// MCP2221 Breakout Module User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002282a.pdf
-    /// MCP2221 I2C Demonstration Board User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002480a.pdf
-    /// </summary>
-    public partial class MCP2221Device : IGPIO
-    {
-        public const int MAX_GPIO = 4;
+        protected static MchpUsbI2c _mchpUsbI2c;
 
         public static Dictionary<int, string> ErrorDescriptions = new Dictionary<int, string>()
         {
@@ -58,8 +43,47 @@ namespace MadeInTheUSB.MCP2221.Lib
             { -208 , "Invalid parameter given(8th parameter) 8" },
             { -209 , "Invalid parameter given(9th parameter) 9" },
         };
+        protected void CheckErrorCode(int r, string message)
+        {
+            if (ErrorDescriptions.ContainsKey(r))
+                throw new MCP2221DeviceException($"{message}, Code:{r} {ErrorDescriptions[r]}");
 
-        private static MchpUsbI2c _mchpUsbI2c;
+            if (r < 0) // Un documented error
+                throw new MCP2221DeviceException($"{message}, Code:{r}");
+        }
+    }
+
+    public class I2CDevice : MCP2221DeviceBase
+    {
+        public const int DEFAULT_I2C_SPEED = 400 * 1024;
+        
+        private readonly int _clockSpeed;
+
+        //_mchpUsbI2c.Functions.WriteI2cData()
+
+        public I2CDevice(int clockSpeed = DEFAULT_I2C_SPEED)
+        {
+            this._clockSpeed = clockSpeed;
+        }
+
+        public bool Write(byte address, byte [] buffer)
+        {
+            _mchpUsbI2c.Functions.WriteI2cData(address, buffer, (uint)buffer.Length, (uint)this._clockSpeed);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Reference Document: MCP2221 DLL User Manual.pdf
+    /// https://www.microchip.com/wwwproducts/en/MCP2221
+    /// Datasheet http://ww1.microchip.com/downloads/en/DeviceDoc/20005292C.pdf
+    /// MCP2221 Breakout Module User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002282a.pdf
+    /// MCP2221 I2C Demonstration Board User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002480a.pdf
+    /// </summary>
+    public partial class MCP2221Device : MCP2221DeviceBase, IGPIO
+    {
+        public const int MAX_GPIO = 4;
+
         public static bool Detect(int index = 0)
         {
             if (_mchpUsbI2c == null)
@@ -98,7 +122,7 @@ namespace MadeInTheUSB.MCP2221.Lib
         
         public List<GPIO> GetGpioSettings()
         {
-            var r = new List<GPIO>();
+            var gpios = new List<GPIO>();
 
             byte[] ioPinDesignations = new byte[MAX_GPIO];
             byte[] ioPinDirections = new byte[MAX_GPIO];
@@ -106,19 +130,22 @@ namespace MadeInTheUSB.MCP2221.Lib
 
             CheckErrorCode(_mchpUsbI2c.Settings.GetGpPinConfiguration(DllConstants.CURRENT_SETTINGS_ONLY, ioPinDesignations, ioPinDirections, ioPinValues), nameof(GetGpioSettings));
 
-            for(var i=0; i < MAX_GPIO; i++)
-                r.Add(new GPIO { Index = 0, Direction = (PinDirection)ioPinDirections[i], State = (PinState)ioPinValues[i], Designation = (PinDesignation)ioPinDesignations[i] });
+            for(var i = 0 ; i < MAX_GPIO; i++)
+            {
+                var gpio = new GPIO
+                {
+                    Index = 0,
+                    Direction = (PinDirection)ioPinDirections[i],
+                    Designation = (PinDesignation)ioPinDesignations[i],
+                    State = (PinState)ioPinValues[i], // this seems to always return 1
+                };
+                if (gpio.Designation == PinDesignation.GPIO)
+                    gpio.State = this.DigitalRead(i);
 
-            return r;
-        }
+                gpios.Add(gpio);
+            }
 
-        private void CheckErrorCode(int r, string message)
-        {
-            if (ErrorDescriptions.ContainsKey(r))
-                throw new MCP2221DeviceException($"{message}, Code:{r} {ErrorDescriptions[r]}");
-
-            if(r < 0) // Un documented error
-                throw new MCP2221DeviceException($"{message}, Code:{r}");
+            return gpios;
         }
 
         public override string ToString()
@@ -143,11 +170,24 @@ namespace MadeInTheUSB.MCP2221.Lib
             return sb.ToString();
         }
 
+        public void SetPinDirection(IEnumerable<int> indexes, PinDirection direction, PinState? state = null)
+        {
+            foreach (var index in indexes)
+                this.SetPinDirection(index, direction, state);
+        }
+
         public void SetPinDirection(int index, PinDirection direction)
+        {
+            this.SetPinDirection(index, direction);
+        }
+
+        public void SetPinDirection(int index, PinDirection direction, PinState? state = null)
         {
             var gpios = this.GetGpioSettings();
             gpios[index].Designation = PinDesignation.GPIO;
             gpios[index].Direction = direction;
+            if (state.HasValue)
+                gpios[index].State = state.Value;
             this.SetGpioSettings(gpios);
         }
 
@@ -170,11 +210,13 @@ namespace MadeInTheUSB.MCP2221.Lib
             DigitalWrite(index, on == PinState.High);
         }
 
+        
+
         public IEnumerable<int> GpioIndexes
         {
             get
             {
-                return Enumerable.Range(1, MAX_GPIO).Select(x => x * x);
+                return Enumerable.Range(0, MAX_GPIO);
             }
         }
     }

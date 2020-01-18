@@ -53,9 +53,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\MadeInTheUSB.MCP2221.Lib\MadeInTheUSB.MCP2221.Lib.csproj">
+    <ProjectReference Include="..\MadeInTheUSB.MCP2221.Library\MadeInTheUSB.MCP2221.Library.csproj">
       <Project>{d6279c4e-262f-44e9-8fa4-54127a7c40dd}</Project>
-      <Name>MadeInTheUSB.MCP2221.Lib</Name>
+      <Name>MadeInTheUSB.MCP2221.Library</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
