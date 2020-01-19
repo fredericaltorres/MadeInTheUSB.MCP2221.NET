@@ -14,6 +14,7 @@ namespace MadeInTheUSB.MCP2221.Lib
     /// MCP2221 I2C Demonstration Board User’s Guide - http://ww1.microchip.com/downloads/en/devicedoc/50002480a.pdf
     /// 
     /// https://blog.zakkemble.net/mcp2221-hid-library/
+    /// https://github.com/kelray/MCP2221-Examples-for-Windows
     /// 
     /// </summary>
     public partial class MCP2221Device : MCP2221DeviceBase, IGPIO
@@ -99,6 +100,8 @@ namespace MadeInTheUSB.MCP2221.Lib
             sb.Append($"InitialPinValueLedI2c: {_mchpUsbI2c.Settings.GetInitialPinValueLedI2c()}").AppendLine();
             sb.Append($"UsbCurrentRequirement: {_mchpUsbI2c.Settings.GetUsbCurrentRequirement()} mA").AppendLine();
             sb.Append($"UsbPowerSource: {(UsbPowerSource)_mchpUsbI2c.Settings.GetUsbPowerSource()}").AppendLine();
+            sb.Append($"AdcVoltageReference: {_mchpUsbI2c.Settings.GetAdcVoltageReference()}").AppendLine();
+            sb.Append($"InitialPinValueLedI2c: {_mchpUsbI2c.Settings.GetInitialPinValueLedI2c()}").AppendLine();
 
             int r = _mchpUsbI2c.Settings.GetClockPinDividerValue(DllConstants.CURRENT_SETTINGS_ONLY); //  Get the current (SRAM) setting of the clock pin divider value
             sb.Append($"Clock pin divider: {(1 << r)}").AppendLine();

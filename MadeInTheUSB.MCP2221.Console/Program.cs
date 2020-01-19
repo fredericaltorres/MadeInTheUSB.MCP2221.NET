@@ -43,7 +43,6 @@ namespace MadeInTheUSB.MCP2221.Console
                     //    Thread.Sleep(1 * 1000);
                     //}
 
-
                     var ledBackpack = new LEDBackpack(8, 8, d.GetI2CDeviceInstance(0x70));
                     if(ledBackpack.Detect(0x70))
                     {

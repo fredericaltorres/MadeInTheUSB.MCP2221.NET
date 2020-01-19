@@ -215,9 +215,8 @@ namespace MadeInTheUSB.Adafruit
         public virtual void Clear(bool refresh = false)
         {
             for (var i = 0; i < 8; i++)
-            {
                 _displayBuffer[i] = 0;
-            }
+
             if (refresh)
                 this.WriteDisplay();
         }

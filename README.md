@@ -22,3 +22,6 @@ https://learn.adafruit.com/circuitpython-libraries-on-any-computer-with-mcp2221/
 C:\Program Files (x86)\Microchip\MCP2221CLI
 C:\Program Files (x86)\Microchip\MCP2221Utility
 "C:\Program Files (x86)\Microchip\MCP2221Utility\MCP2221Utility.exe"
+
+.\MCP2221CLI.exe -slave7=70 -i2cW=21 -speed=400000
+.\MCP2221CLI.exe -i2cw -help

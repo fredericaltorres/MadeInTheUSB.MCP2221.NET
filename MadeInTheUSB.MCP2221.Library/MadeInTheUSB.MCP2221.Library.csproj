@@ -48,10 +48,10 @@
     <Compile Include="Adafruit\LEDBackpack.cs" />
     <Compile Include="Interface\II2CDevice.cs" />
     <Compile Include="Util\BitUtil.cs" />
-    <Compile Include="Class\FlashProtectionState.cs" />
+    <Compile Include="Enum\FlashProtectionState.cs" />
     <Compile Include="Class\GPIO.cs" />
     <Compile Include="Class\I2CDevice.cs" />
-    <Compile Include="Class\IGPIO.cs" />
+    <Compile Include="Interface\IGPIO.cs" />
     <Compile Include="Class\MCP2221Device.cs" />
     <Compile Include="Class\MCP2221DeviceBase.cs" />
     <Compile Include="Enum\UsbPowerSource.cs" />

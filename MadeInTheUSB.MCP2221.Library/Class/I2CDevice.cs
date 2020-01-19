@@ -1,6 +1,7 @@
 ﻿namespace MadeInTheUSB.MCP2221.Lib
 {
-    public enum ClockDivider { 
+    public enum ClockDivider 
+    { 
         MCP2221_CLKDIV_RESERVED = 0,    /**< Invalid */
         MCP2221_CLKDIV_2 = 1,           /**< 24MHz */
         MCP2221_CLKDIV_4 = 2,           /**< 12MHz */
@@ -13,7 +14,7 @@
 
     public class I2CDevice : MCP2221DeviceBase, II2CDevice
     {
-        public const int DEFAULT_I2C_SPEED = 400 * 512;
+        public const int DEFAULT_I2C_SPEED = 200 * 1024;
         private byte _address;
         private readonly int _clockSpeed;
 
