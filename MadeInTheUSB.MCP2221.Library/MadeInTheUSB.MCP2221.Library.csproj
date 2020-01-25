@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="Adafruit\Adafruit_GFX.cs" />
     <Compile Include="Adafruit\LEDBackpack.cs" />
+    <Compile Include="Class\AnalogDevice.cs" />
     <Compile Include="Interface\II2CDevice.cs" />
     <Compile Include="Util\BitUtil.cs" />
     <Compile Include="Enum\FlashProtectionState.cs" />

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace MadeInTheUSB.MCP2221.Lib
     /// https://blog.zakkemble.net/mcp2221-hid-library/
     /// https://github.com/kelray/MCP2221-Examples-for-Windows
     /// 
+    /// https://github.com/kelray/MCP2221-Examples-for-Windows
     /// </summary>
     public partial class MCP2221Device : MCP2221DeviceBase, IGPIO
     {
@@ -34,7 +36,12 @@ namespace MadeInTheUSB.MCP2221.Lib
 
         public MCP2221Device(int index)
         {
+            if (_mchpUsbI2c == null)
+                throw new ArgumentException("Detect device first");
+
             CheckErrorCode(_mchpUsbI2c.Management.SelectDev(index), $"Select device {index}");
+
+            var r = _mchpUsbI2c.Management.GetSelectedDevInfo();
         }
 
         public bool SetGpioSettings(List<GPIO> gpios)
@@ -105,8 +112,6 @@ namespace MadeInTheUSB.MCP2221.Lib
 
             int r = _mchpUsbI2c.Settings.GetClockPinDividerValue(DllConstants.CURRENT_SETTINGS_ONLY); //  Get the current (SRAM) setting of the clock pin divider value
             sb.Append($"Clock pin divider: {(1 << r)}").AppendLine();
-
-
             sb.Append($"ClockPinDividerValue: {(UsbPowerSource)_mchpUsbI2c.Settings.GetClockPinDividerValue(DllConstants.CURRENT_SETTINGS_ONLY)}").AppendLine();
             sb.Append($"GetClockPinDutyCycle: {(UsbPowerSource)_mchpUsbI2c.Settings.GetClockPinDutyCycle(DllConstants.CURRENT_SETTINGS_ONLY)}").AppendLine();
 
@@ -133,6 +138,18 @@ namespace MadeInTheUSB.MCP2221.Lib
                 gpios[index].State = state.Value;
             this.SetGpioSettings(gpios);
         }
+
+        public void SetToAnalogMode(int index)
+        {
+            var gpios = this.GetGpioSettings();
+            gpios[index].Designation = PinDesignation.ADC;
+            gpios[index].Direction = PinDirection.Input;
+            gpios[index].State = 0;
+            this.SetGpioSettings(gpios);
+        }
+
+        // _mchpUsbI2c.Settings.GetAdcVoltageReference() +++
+
 
         public PinState DigitalRead(int index)
         {
@@ -165,6 +182,10 @@ namespace MadeInTheUSB.MCP2221.Lib
         public I2CDevice GetI2CDeviceInstance(byte address, int clockSpeed = I2CDevice.DEFAULT_I2C_SPEED)
         {
             return new I2CDevice(address, clockSpeed);
+        }
+        public AnalogDevice GetAnalogDevice(int index)
+        {
+            return new AnalogDevice(index, this);
         }
     }
 }

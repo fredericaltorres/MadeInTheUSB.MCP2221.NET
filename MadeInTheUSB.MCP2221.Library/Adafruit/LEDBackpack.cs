@@ -160,7 +160,7 @@ namespace MadeInTheUSB.Adafruit
         public void Begin(byte address)
         {
             this._i2c.SetAddress(address);
-            this._i2c.Write(new byte[] { HT16K33_CMD_TURN_OSCILLATOR_ON });
+            var r = this._i2c.Write(new byte[] { HT16K33_CMD_TURN_OSCILLATOR_ON });
             this.SetBlinkRate(HT16K33_BLINK_OFF);
             this.SetBrightness(5); // 0 to 15
             this.Clear(true);

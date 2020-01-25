@@ -21,19 +21,24 @@ namespace MadeInTheUSB.MCP2221.Console
                     System.Console.WriteLine(d.ToString());
                     var gpios = d.GetGpioSettings();
 
-                    //d.SetPinDirection(d.GpioIndexes, PinDirection.Output, PinState.Low);
+                    d.SetPinDirection(d.GpioIndexes, PinDirection.Output, PinState.Low);
 
                     //foreach (var index in d.GpioIndexes)
                     //{
                     //    d.DigitalWrite(index, PinState.High);
-                    //    Thread.Sleep(1 * 200);
+                    //    Thread.Sleep(1 * 100);
                     //}
-
                     //foreach (var index in d.GpioIndexes)
                     //{
                     //    d.DigitalWrite(index, PinState.Low);
-                    //    Thread.Sleep(1 * 200);
+                    //    Thread.Sleep(1 * 100);
                     //}
+                    
+                    var a1 = d.GetAnalogDevice(1);
+                    System.Console.WriteLine($"GetAdcVoltageReference: {a1.GetVoltageReference()}");
+                    a1.SetAdcVoltageReference(ReferenceVoltage.r_Vdd);
+                    System.Console.WriteLine($"GetAdcVoltageReference: {a1.GetVoltageReference()}");
+                    System.Console.WriteLine($"AdcVoltageReference: {a1.GetDigitalValue()} {a1.GetVoltage()}");
 
                     //gpios = d.GetGpioSettings();
                     //d.SetPinDirection(0, PinDirection.Input, PinState.Low);

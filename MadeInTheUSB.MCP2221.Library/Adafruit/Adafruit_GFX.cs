@@ -179,7 +179,6 @@ namespace MadeInTheUSB.Adafruit
                 f += ddF_x;
                 if (BitUtil.IsSet(cornername, 0x4))
                 {
-
                     DrawPixel((int16_t)(x0 + x), (int16_t)(y0 + y), color);
                     DrawPixel((int16_t)(x0 + y), (int16_t)(y0 + x), color);
                 }
