@@ -186,6 +186,7 @@ namespace MadeInTheUSB.MCP2221.Lib
         public AnalogDevice GetAnalogDevice(int index)
         {
             return new AnalogDevice(index, this);
+            
         }
     }
 }

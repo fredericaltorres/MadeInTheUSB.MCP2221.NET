@@ -35,6 +35,7 @@ namespace MadeInTheUSB.MCP2221.Lib
             this.Index = index;
             this.mcp2221 = mcp2221;
             this.mcp2221.SetToAnalogMode(index);
+            this.SetAdcVoltageReference(ReferenceVoltage.r_Vdd);
         }
         public double GetVoltageReferenceValue()
         {
