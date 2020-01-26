@@ -20,9 +20,7 @@ namespace MadeInTheUSB.MCP2221.Console
                     var d = new MCP2221Device(0);
                     System.Console.WriteLine(d.ToString());
                     var gpios = d.GetGpioSettings();
-
                     d.SetPinDirection(d.GpioIndexes, PinDirection.Output, PinState.Low);
-
                     //foreach (var index in d.GpioIndexes)
                     //{
                     //    d.DigitalWrite(index, PinState.High);
@@ -33,8 +31,12 @@ namespace MadeInTheUSB.MCP2221.Console
                     //    d.DigitalWrite(index, PinState.Low);
                     //    Thread.Sleep(1 * 100);
                     //}
-                    var a1 = d.GetAnalogDevice(1);
-                    System.Console.WriteLine($"GetAdcVoltageReference: {a1.GetVoltageReference()}");
+                    var adcs = new List<AnalogDevice>() {
+                        d.GetAnalogDevice(1), // Turn the IO into analog
+                        d.GetAnalogDevice(2), // Turn the IO into analog
+                        d.GetAnalogDevice(3), // Turn the IO into analog
+                    };
+                    System.Console.WriteLine($"GetAdcVoltageReference: {adcs[0].GetVoltageReference()}");
                     
                     while(true)
                     {
@@ -44,10 +46,12 @@ namespace MadeInTheUSB.MCP2221.Console
                             if (k.Key == ConsoleKey.Q)
                                 break;
                         }
-                        System.Console.WriteLine($"AdcVoltageReference: {a1.GetDigitalValue()} {a1.GetVoltage()}");
+                        adcs.ForEach((a) => {
+                            System.Console.WriteLine($"AdcVoltageReference: [{a.Index}] {a.GetDigitalValue()} {a.GetVoltage()}");
+                        });
+                        System.Console.WriteLine("");
                         Thread.Sleep(1000);
                     }
-
                     //gpios = d.GetGpioSettings();
                     //d.SetPinDirection(0, PinDirection.Input, PinState.Low);
                     //while (true)
@@ -55,7 +59,6 @@ namespace MadeInTheUSB.MCP2221.Console
                     //    System.Console.WriteLine($"Pin[0] Read:{d.DigitalRead(0)}");
                     //    Thread.Sleep(1 * 1000);
                     //}
-
                     var ledBackpack = new LEDBackpack(8, 8, d.GetI2CDeviceInstance(0x70));
                     if(ledBackpack.Detect(0x70))
                     {
